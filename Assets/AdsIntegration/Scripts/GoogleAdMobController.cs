@@ -152,7 +152,7 @@ public class GoogleAdMobController : MonoBehaviour
         }
 
         // Create a 320x50 banner at top of the screen
-        bannerView = new BannerView(adUnitId, AdSize.Banner, AdPosition.Top);
+        bannerView = new BannerView(adUnitId, AdSize.Banner, AdPosition.Bottom);
 
         // Add Event Handlers
         bannerView.OnBannerAdLoaded += () =>

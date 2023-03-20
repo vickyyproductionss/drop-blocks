@@ -68,7 +68,7 @@ public class GameManager2 : MonoBehaviour
         Time.timeScale = 1;
         isGameOver = false;
         arrangeSize();
-        NextBlockValue = Random.Range(0, 6);
+        NextBlockValue = Random.Range(1, 6);
         SpawnBlock();
         UpdateScore();
         
@@ -404,7 +404,7 @@ public class GameManager2 : MonoBehaviour
             {
                 var pos = touch.position;
                 RaycastHit2D hitInfo = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(pos), Vector2.zero);
-                if(hitInfo && slideOrNot(fallingBlock, Camera.main.ScreenToWorldPoint(pos), hitInfo))
+                if(hitInfo && SlideOrNot(fallingBlock, Camera.main.ScreenToWorldPoint(pos), hitInfo))
                 {
                     if (hitInfo.collider.tag == "1" || hitInfo.collider.tag == "stableBlock")
                     {
@@ -441,7 +441,7 @@ public class GameManager2 : MonoBehaviour
             }
         }
     }
-    bool slideOrNot(GameObject fallingBlock, Vector2 TouchPos, RaycastHit2D hitInfo)
+    bool SlideOrNot(GameObject fallingBlock, Vector2 TouchPos, RaycastHit2D hitInfo)
     {
         for(int i = 0; i < BlockParent.transform.childCount - 1; i++)
         {
@@ -526,9 +526,44 @@ public class GameManager2 : MonoBehaviour
             }
             else
             {
-                int num1 = GetMaxBlock();
-                int highestPower = (int)Mathf.Log(num1, 2);
-                power = Random.Range(1,highestPower);
+                if(BlockParent.transform.childCount < 10)
+                {
+                    int num1 = GetMaxBlock();
+                    int highestPower = (int)Mathf.Log(num1, 2);
+                    power = Random.Range(1, highestPower-highestPower/2);
+                }
+                else
+                {
+                    List<int> values = new List<int>();
+                    List<float> xposes = new List<float>();
+                    for(int i = 0; i < BlockParent.transform.childCount;i++)
+                    {
+                        if(!xposes.Contains(BlockParent.transform.GetChild(i).transform.position.x))
+                        {
+                            xposes.Add(BlockParent.transform.GetChild(i).transform.position.x);
+                        }
+                    }
+
+                    for(int i = 0; i < xposes.Count;i++)
+                    {
+                        int tempVal = 2;
+                        float ypos = float.MinValue;
+                        for(int j = 0; j < BlockParent.transform.childCount;j++)
+                        {
+                            if(BlockParent.transform.GetChild(j).transform.position.x == xposes[i])
+                            {
+                                if(BlockParent.transform.GetChild(j).transform.position.y >= ypos)
+                                {
+                                    ypos = BlockParent.transform.GetChild(j).transform.position.y;
+                                    tempVal = int.Parse(BlockParent.transform.GetChild(j).GetChild(0).GetChild(0).GetComponent<TMP_Text>().text);
+                                }
+                            }
+                        }
+                        values.Add(tempVal);
+                    }
+                    power = (int)Mathf.Log(values[Random.Range(0, values.Count)], 2);
+                }
+                
             }
             target = Mathf.Pow(target, NextBlockValue);
             NextBlockValue = power;
@@ -557,6 +592,7 @@ public class GameManager2 : MonoBehaviour
             {
                 newBlock.transform.GetChild(0).GetChild(0).GetComponent<TMP_Text>().fontSize = 18;
             }
+            newBlock.GetComponent<Rigidbody2D>().gravityScale = 0.1f;
             changeColorAccordingly(target, newBlock);
             count++;
         }
@@ -586,31 +622,4 @@ public class GameManager2 : MonoBehaviour
             newBlock.transform.GetChild(0).GetChild(0).GetComponent<TMP_Text>().fontSize = 18;
         }
     }
-    //public IEnumerator checkSpeed()
-    //{
-    //    if (fallingBlock.GetComponent<Rigidbody2D>().velocity.magnitude == 0)
-    //    {
-    //        mergeNow();
-    //        stoppedSeconds = stoppedSeconds + 0.1f;
-    //        yield return new WaitForSeconds(0.1f);
-    //        if (stoppedSeconds < 0.2f)
-    //        {
-    //            StartCoroutine(checkSpeed());
-    //        }
-    //        else
-    //        {
-    //            spawnNow = false;
-    //            stoppedSeconds = 0;
-    //        }
-
-    //    }
-    //    else
-    //    {
-    //        stoppedSeconds = 0;
-    //        yield return new WaitForSeconds(0.1f);
-    //        StartCoroutine(checkSpeed());
-    //    }
-    //}
-
-
 }
